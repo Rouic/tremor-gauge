@@ -7,6 +7,7 @@ import type { Color } from "../utils/chartColors";
 
 const meta: Meta = {
   title: "Examples",
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -100,6 +101,50 @@ export const RevenueBreakdown: StoryObj<RevenueArgs> = {
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeMulti, GaugeLegend } from "tremor-gauge";
+
+const data = [
+  { source: "Direct", revenue: 4520 },
+  { source: "Organic Search", revenue: 2890 },
+  { source: "Referral", revenue: 1340 },
+  { source: "Social Media", revenue: 780 },
+];
+const colors = ["blue", "cyan", "violet", "amber"];
+const gbp = (v) =>
+  v.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
+
+function RevenueBreakdown() {
+  const [active, setActive] = useState(undefined);
+  const legend = data.map((d, i) => ({ name: d.source, value: d.revenue, color: colors[i] }));
+  return (
+    <>
+      <GaugeMulti
+        data={data}
+        category="source"
+        value="revenue"
+        colors={colors}
+        label="Total Revenue"
+        valueFormatter={gbp}
+        activeName={active}
+        onValueChange={(d) => setActive(d ? d.source : undefined)}
+      />
+      <GaugeLegend
+        items={legend}
+        valueFormatter={gbp}
+        showShare
+        activeName={active}
+        onItemClick={(name) => setActive(active === name ? undefined : name)}
+      />
+    </>
+  );
+}`,
+      },
+    },
+  },
   render: (args) => {
     const [active, setActive] = useState<string | undefined>(undefined);
     const legend = revenueData.map((d, i) => ({
@@ -171,6 +216,51 @@ export const BudgetSideBySide: StoryObj<BudgetArgs> = {
   argTypes: {
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeMulti, GaugeLegend } from "tremor-gauge";
+
+const data = [
+  { dept: "Engineering", spend: 280000 },
+  { dept: "Marketing", spend: 145000 },
+  { dept: "Sales", spend: 98000 },
+  { dept: "Operations", spend: 67000 },
+  { dept: "HR", spend: 42000 },
+];
+const colors = ["blue", "emerald", "violet", "amber", "pink"];
+
+function BudgetAllocation() {
+  const [active, setActive] = useState(undefined);
+  const legend = data.map((d, i) => ({ name: d.dept, value: d.spend, color: colors[i] }));
+  return (
+    <div className="grid grid-cols-2 gap-8">
+      <GaugeMulti
+        data={data}
+        category="dept"
+        value="spend"
+        colors={colors}
+        label="Total Spend"
+        valueFormatter={(v) => \`£\${(v / 1000).toFixed(0)}k\`}
+        arcSpan={270}
+        strokeWidth={14}
+        activeName={active}
+        onValueChange={(d) => setActive(d ? d.dept : undefined)}
+      />
+      <GaugeLegend
+        items={legend}
+        valueFormatter={(v) => \`£\${(v / 1000).toFixed(0)}k\`}
+        showShare
+        activeName={active}
+        onItemClick={(name) => setActive(active === name ? undefined : name)}
+      />
+    </div>
+  );
+}`,
+      },
+    },
   },
   render: (args) => {
     const [active, setActive] = useState<string | undefined>(undefined);
@@ -246,6 +336,37 @@ export const KPIDashboard: StoryObj<KPIArgs> = {
     diskIO: { control: { type: "range", min: 0, max: 100 } },
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+<div className="grid grid-cols-3 gap-6">
+  <GaugeChart
+    value={73}
+    color="blue"
+    label="Current"
+    valueFormatter={(v) => \`\${v}%\`}
+    showNeedle
+  />
+  <GaugeChart
+    value={45}
+    color="emerald"
+    label="Allocated"
+    valueFormatter={(v) => \`\${v}%\`}
+    showNeedle
+  />
+  <GaugeChart
+    value={88}
+    color="amber"
+    label="Utilization"
+    valueFormatter={(v) => \`\${v}%\`}
+    showNeedle
+  />
+</div>`,
+      },
+    },
   },
   render: (args) => (
     <div className="mx-auto max-w-4xl">
@@ -326,6 +447,28 @@ export const ServerHealth: StoryObj<ServerHealthArgs> = {
     strokeWidth: strokeWidthArg,
     showThresholdArc: { control: "select", options: [false, true, "ticks", "bands"] },
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+<GaugeChart
+  value={72}
+  showNeedle
+  showMinMax
+  arcSpan={240}
+  strokeWidth={14}
+  label="Health Score"
+  thresholds={[
+    { value: 0, color: "pink" },
+    { value: 40, color: "amber" },
+    { value: 70, color: "emerald" },
+  ]}
+  showThresholdArc="bands"
+/>`,
+      },
+    },
+  },
   render: (args) => (
     <Card className="sm:mx-auto sm:max-w-sm">
       <CardTitle>Server Health</CardTitle>
@@ -396,6 +539,32 @@ export const DualGaugeComparison: StoryObj<DualArgs> = {
     backendColor: colorArg,
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+<div className="grid grid-cols-2 gap-6">
+  <GaugeChart
+    value={92}
+    color="blue"
+    label="Frontend"
+    valueFormatter={(v) => \`\${v}%\`}
+    arcSpan={240}
+    strokeWidth={12}
+  />
+  <GaugeChart
+    value={78}
+    color="violet"
+    label="Backend"
+    valueFormatter={(v) => \`\${v}%\`}
+    arcSpan={240}
+    strokeWidth={12}
+  />
+</div>`,
+      },
+    },
   },
   render: (args) => (
     <Card className="sm:mx-auto sm:max-w-xl">
@@ -489,6 +658,23 @@ export const PerformanceScore: StoryObj<PerfArgs> = {
     gradientFrom: colorArg,
     gradientTo: colorArg,
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+<GaugeChart
+  value={92}
+  gradient={{ from: "cyan", to: "blue" }}
+  label="Excellent"
+  showMinMax
+  arcSpan={240}
+  strokeWidth={14}
+  valueFormatter={(v) => \`\${v}%\`}
+/>`,
+      },
+    },
+  },
   render: (args) => (
     <Card className="sm:mx-auto sm:max-w-sm">
       <CardTitle>Performance Score</CardTitle>
@@ -560,6 +746,66 @@ export const DashboardRow: StoryObj<DashboardRowArgs> = {
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
     showThresholdArc: { control: "select", options: [false, true, "ticks", "bands"] },
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeChart, GaugeMulti, GaugeLegend } from "tremor-gauge";
+
+const trafficData = [
+  { channel: "Organic", sessions: 12400 },
+  { channel: "Paid", sessions: 8200 },
+  { channel: "Social", sessions: 4100 },
+  { channel: "Direct", sessions: 6800 },
+];
+const colors = ["emerald", "blue", "pink", "amber"];
+
+function DashboardRow() {
+  const [active, setActive] = useState(undefined);
+  const legend = trafficData.map((d, i) => ({ name: d.channel, value: d.sessions, color: colors[i] }));
+  return (
+    <div className="grid grid-cols-5 gap-6">
+      <div className="col-span-3">
+        <GaugeMulti
+          data={trafficData}
+          category="channel"
+          value="sessions"
+          colors={colors}
+          label="Total Sessions"
+          valueFormatter={(v) => (v >= 1000 ? \`\${(v / 1000).toFixed(1)}k\` : \`\${v}\`)}
+          activeName={active}
+          onValueChange={(d) => setActive(d ? d.channel : undefined)}
+        />
+        <GaugeLegend
+          items={legend}
+          valueFormatter={(v) => v.toLocaleString()}
+          showShare
+          activeName={active}
+          onItemClick={(name) => setActive(active === name ? undefined : name)}
+        />
+      </div>
+      <div className="col-span-2">
+        <GaugeChart
+          value={34}
+          showNeedle
+          arcSpan={240}
+          strokeWidth={12}
+          label="Current"
+          valueFormatter={(v) => \`\${v}%\`}
+          thresholds={[
+            { value: 0, color: "emerald" },
+            { value: 35, color: "amber" },
+            { value: 60, color: "pink" },
+          ]}
+          showThresholdArc
+        />
+      </div>
+    </div>
+  );
+}`,
+      },
+    },
   },
   render: (args) => {
     const [active, setActive] = useState<string | undefined>(undefined);
@@ -667,6 +913,30 @@ export const TemperatureGauge: StoryObj<TempArgs> = {
     strokeWidth: strokeWidthArg,
     showThresholdArc: { control: "select", options: [false, true, "ticks", "bands"] },
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+<GaugeChart
+  value={67}
+  min={20}
+  max={100}
+  showNeedle
+  showMinMax
+  arcSpan={270}
+  strokeWidth={12}
+  label="°C"
+  thresholds={[
+    { value: 20, color: "emerald" },
+    { value: 70, color: "amber" },
+    { value: 85, color: "pink" },
+  ]}
+  showThresholdArc
+/>`,
+      },
+    },
+  },
   render: (args) => (
     <Card className="sm:mx-auto sm:max-w-xs">
       <CardTitle>Server Temperature</CardTitle>
@@ -735,6 +1005,34 @@ export const CompactHealthGrid: StoryObj<GridArgs> = {
     throughput: { control: { type: "range", min: 0, max: 100 } },
     strokeWidth: strokeWidthArg,
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+const metrics = [
+  { name: "Uptime", value: 99.9, max: 100, color: "emerald", fmt: (v) => \`\${v}%\` },
+  { name: "Latency", value: 42, max: 200, color: "blue", fmt: (v) => \`\${v}ms\` },
+  { name: "Error Rate", value: 0.3, max: 5, color: "amber", fmt: (v) => \`\${v}%\` },
+  { name: "Throughput", value: 84, max: 100, color: "violet", fmt: (v) => \`\${v}%\` },
+];
+
+<div className="grid grid-cols-2 gap-6">
+  {metrics.map((m) => (
+    <GaugeChart
+      key={m.name}
+      value={m.value}
+      max={m.max}
+      color={m.color}
+      showLabel
+      valueFormatter={m.fmt}
+      strokeWidth={8}
+    />
+  ))}
+</div>`,
+      },
+    },
+  },
   render: (args) => {
     const metrics = [
       { name: "Uptime", value: args.uptime, max: 100, color: "emerald" as Color, fmt: (v: number) => `${v}%` },
@@ -790,6 +1088,55 @@ export const UsersByRegion: StoryObj<RegionArgs> = {
   argTypes: {
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeMulti, GaugeLegend } from "tremor-gauge";
+
+const data = [
+  { region: "North America", users: 48200 },
+  { region: "Europe", users: 31500 },
+  { region: "Asia Pacific", users: 22800 },
+  { region: "Latin America", users: 8900 },
+];
+const colors = ["blue", "violet", "cyan", "pink"];
+
+function UsersByRegion() {
+  const [selected, setSelected] = useState(undefined);
+  return (
+    <>
+      <GaugeMulti
+        data={data}
+        category="region"
+        value="users"
+        colors={colors}
+        label="Total Users"
+        valueFormatter={(v) => (v >= 1000 ? \`\${(v / 1000).toFixed(1)}k\` : \`\${v}\`)}
+        arcSpan={240}
+        strokeWidth={16}
+        customTooltip={({ datum }) => (
+          <div>
+            <span>{datum.region}</span>
+            <span>{Number(datum.users).toLocaleString()} users</span>
+          </div>
+        )}
+        activeName={selected}
+        onValueChange={(d) => setSelected(d ? d.region : undefined)}
+      />
+      <GaugeLegend
+        items={data.map((d, i) => ({ name: d.region, value: d.users, color: colors[i] }))}
+        valueFormatter={(v) => v.toLocaleString()}
+        showShare
+        activeName={selected}
+        onItemClick={(name) => setSelected(selected === name ? undefined : name)}
+      />
+    </>
+  );
+}`,
+      },
+    },
   },
   render: (args) => {
     const data = [
@@ -880,6 +1227,33 @@ export const SystemOverview: StoryObj<SystemArgs> = {
     cdn: { control: { type: "range", min: 0, max: 100 } },
     strokeWidth: strokeWidthArg,
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+const items = [
+  { name: "API Gateway", health: 98, color: "emerald" },
+  { name: "Database", health: 94, color: "blue" },
+  { name: "Cache Layer", health: 100, color: "violet" },
+  { name: "CDN", health: 87, color: "amber" },
+];
+
+<div className="flex items-end justify-center gap-8">
+  {items.map((s) => (
+    <GaugeChart
+      key={s.name}
+      value={s.health}
+      color={s.color}
+      showLabel
+      valueFormatter={(v) => \`\${v}%\`}
+      strokeWidth={8}
+    />
+  ))}
+</div>`,
+      },
+    },
+  },
   render: (args) => {
     const items = [
       { name: "API Gateway", health: args.apiGateway, color: "emerald" as Color },
@@ -943,6 +1317,42 @@ export const GaugeWithLegendRow: StoryObj<PipelineArgs> = {
     failed: { control: { type: "range", min: 0, max: 100 } },
     color: colorArg,
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeChart, GaugeLegend } from "tremor-gauge";
+
+const items = [
+  { name: "Completed", value: 68, color: "emerald" },
+  { name: "In Progress", value: 22, color: "blue" },
+  { name: "Failed", value: 10, color: "pink" },
+];
+
+function PipelineStatus() {
+  const [active, setActive] = useState(undefined);
+  return (
+    <div className="flex items-center gap-6">
+      <GaugeChart
+        value={68}
+        color="emerald"
+        label="Completed"
+        valueFormatter={(v) => \`\${v}%\`}
+        strokeWidth={12}
+      />
+      <GaugeLegend
+        items={items}
+        valueFormatter={(v) => \`\${v}%\`}
+        showShare
+        activeName={active}
+        onItemClick={(name) => setActive(active === name ? undefined : name)}
+      />
+    </div>
+  );
+}`,
+      },
+    },
   },
   render: (args) => {
     const items = [
@@ -1020,6 +1430,44 @@ export const DualThresholdGauges: StoryObj<DualTempArgs> = {
     strokeWidth: strokeWidthArg,
     showThresholdArc: { control: "select", options: [false, true, "ticks", "bands"] },
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+const thresholds = [
+  { value: 20, color: "emerald" },
+  { value: 65, color: "amber" },
+  { value: 85, color: "pink" },
+];
+
+<div className="grid grid-cols-2 gap-6">
+  <GaugeChart
+    value={62}
+    min={20}
+    max={100}
+    showNeedle
+    arcSpan={240}
+    strokeWidth={12}
+    label="°C"
+    thresholds={thresholds}
+    showThresholdArc
+  />
+  <GaugeChart
+    value={78}
+    min={20}
+    max={100}
+    showNeedle
+    arcSpan={240}
+    strokeWidth={12}
+    label="°C"
+    thresholds={thresholds}
+    showThresholdArc
+  />
+</div>`,
+      },
+    },
+  },
   render: (args) => (
     <div className="mx-auto max-w-2xl">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -1095,6 +1543,49 @@ export const SalesWithTarget: StoryObj<SalesArgs> = {
   argTypes: {
     target: { control: { type: "range", min: 3000000, max: 12000000, step: 500000 } },
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeMulti, GaugeLegend } from "tremor-gauge";
+
+const data = [
+  { team: "Enterprise", closed: 3200000 },
+  { team: "Mid-Market", closed: 1800000 },
+  { team: "SMB", closed: 950000 },
+];
+const colors = ["blue", "violet", "cyan"];
+
+function SalesAttainment() {
+  const [active, setActive] = useState(undefined);
+  const legend = data.map((d, i) => ({ name: d.team, value: d.closed, color: colors[i] }));
+  return (
+    <div className="grid grid-cols-2 gap-6">
+      <GaugeMulti
+        data={data}
+        category="team"
+        value="closed"
+        colors={colors}
+        label="Total Closed"
+        valueFormatter={(v) => \`£\${(v / 1e6).toFixed(1)}M\`}
+        marker={{ value: 7000000 }}
+        strokeWidth={14}
+        activeName={active}
+        onValueChange={(d) => setActive(d ? d.team : undefined)}
+      />
+      <GaugeLegend
+        items={legend}
+        valueFormatter={(v) => \`£\${(v / 1e6).toFixed(1)}M\`}
+        showShare
+        activeName={active}
+        onItemClick={(name) => setActive(active === name ? undefined : name)}
+      />
+    </div>
+  );
+}`,
+      },
+    },
   },
   render: (args) => {
     const [active, setActive] = useState<string | undefined>(undefined);
@@ -1181,6 +1672,34 @@ export const GradientGaugesRow: StoryObj<NetArgs> = {
     latency: { control: { type: "range", min: 0, max: 100 } },
     strokeWidth: strokeWidthArg,
   },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { GaugeChart } from "tremor-gauge";
+
+<div className="grid grid-cols-3 gap-6">
+  <GaugeChart
+    value={78}
+    gradient={{ from: "cyan", to: "blue" }}
+    label="Mbps"
+    strokeWidth={14}
+  />
+  <GaugeChart
+    value={92}
+    gradient={{ from: "emerald", to: "cyan" }}
+    label="Mbps"
+    strokeWidth={14}
+  />
+  <GaugeChart
+    value={23}
+    gradient={{ from: "violet", to: "pink" }}
+    label="ms"
+    strokeWidth={14}
+  />
+</div>`,
+      },
+    },
+  },
   render: (args) => (
     <div className="mx-auto max-w-4xl">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -1247,6 +1766,65 @@ export const FullDashboard: StoryObj<FullArgs> = {
     portfolioReturn: { control: { type: "range", min: -20, max: 30, step: 0.1 } },
     arcSpan: arcSpanArg,
     strokeWidth: strokeWidthArg,
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { useState } from "react";
+import { GaugeChart, GaugeMulti, GaugeLegend } from "tremor-gauge";
+
+const allocData = [
+  { asset: "Equities", amount: 42000 },
+  { asset: "Bonds", amount: 28000 },
+  { asset: "Real Estate", amount: 18000 },
+  { asset: "Cash", amount: 12000 },
+];
+const colors = ["blue", "emerald", "violet", "amber"];
+const gbp = (v) =>
+  v.toLocaleString("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
+
+function PortfolioDashboard() {
+  const [active, setActive] = useState(undefined);
+  const legend = allocData.map((d, i) => ({ name: d.asset, value: d.amount, color: colors[i] }));
+  return (
+    <div className="grid grid-cols-3 gap-6">
+      <GaugeChart
+        value={14.2}
+        min={-20}
+        max={30}
+        color="emerald"
+        label="YTD Return"
+        showNeedle
+        showMinMax
+        arcSpan={240}
+        strokeWidth={12}
+        valueFormatter={(v) => \`\${v > 0 ? "+" : ""}\${v}%\`}
+      />
+      <div className="col-span-2 grid grid-cols-2 gap-6">
+        <GaugeMulti
+          data={allocData}
+          category="asset"
+          value="amount"
+          colors={colors}
+          label="Total Value"
+          valueFormatter={gbp}
+          strokeWidth={12}
+          activeName={active}
+          onValueChange={(d) => setActive(d ? d.asset : undefined)}
+        />
+        <GaugeLegend
+          items={legend}
+          valueFormatter={gbp}
+          showShare
+          activeName={active}
+          onItemClick={(name) => setActive(active === name ? undefined : name)}
+        />
+      </div>
+    </div>
+  );
+}`,
+      },
+    },
   },
   render: (args) => {
     const [active, setActive] = useState<string | undefined>(undefined);

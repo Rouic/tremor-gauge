@@ -5,6 +5,7 @@ const meta: Meta<typeof GaugeMulti> = {
   title: "Components/GaugeMulti",
   component: GaugeMulti,
   tags: ["autodocs"],
+  parameters: { docs: { source: { excludeDecorators: true } } },
   decorators: [
     (Story) => (
       <div className="mx-auto max-w-xs rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
