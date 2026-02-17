@@ -7,6 +7,10 @@ const config: StorybookConfig = {
     name: "@storybook/react-vite",
     options: {},
   },
+  docs: {
+    autodocs: "tag",
+    defaultName: "API Reference",
+  },
 };
 
 export default config;

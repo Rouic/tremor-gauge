@@ -2,6 +2,8 @@
 
 Gauge chart components for the [Tremor](https://www.tremor.so/) design system. Pure SVG rendering with zero charting dependencies.
 
+[Live Examples](https://tremor-gauge.rouic.com/) | [npm](https://www.npmjs.com/package/tremor-gauge) | [GitHub](https://github.com/Rouic/tremor-gauge)
+
 - **`GaugeChart`** — Single-value arc gauge with optional needle, thresholds, and gradient fills
 - **`GaugeMulti`** — Multi-segment gauge with interactive segments and tooltips
 - **`GaugeLegend`** — Legend companion with colored indicators, values, and share badges

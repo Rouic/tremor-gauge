@@ -62,9 +62,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rouic/tremor-gauge.git"
+    "url": "git+https://github.com/Rouic/tremor-gauge.git"
   },
-  "homepage": "https://github.com/Rouic/tremor-gauge#readme",
+  "homepage": "https://tremor-gauge.rouic.com/",
   "bugs": {
     "url": "https://github.com/Rouic/tremor-gauge/issues"
   },
