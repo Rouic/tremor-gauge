@@ -61,9 +61,12 @@ export function getArcDash(
 }
 
 /**
- * Calculate needle rotation angle for a given value in range [min, max].
- * Returns degrees where 0° = arc start, arcSpan° = arc end.
- * The actual SVG rotation includes the base rotation offset.
+ * Calculate needle CSS rotation angle for a given value in range [min, max].
+ * Returns degrees for CSS `rotate()` where 0° = 12 o'clock (up), 90° = 3 o'clock.
+ *
+ * The SVG circle path starts at 3 o'clock and the arc is rotated by
+ * `baseRotation` degrees. An additional +90° converts from SVG circle
+ * coordinates (0° = right) to CSS rotation coordinates (0° = up).
  */
 export function getNeedleAngle(
   value: number,
@@ -75,7 +78,8 @@ export function getNeedleAngle(
   const fraction = max === min ? 0 : (clamped - min) / (max - min);
   // Base rotation: where the arc starts (same formula as getArcDash)
   const baseRotation = 90 + (360 - arcSpan) / 2;
-  return baseRotation + fraction * arcSpan;
+  // +90 converts from SVG circle coords (0°=right) to CSS rotation (0°=up)
+  return baseRotation + fraction * arcSpan + 90;
 }
 
 /**

@@ -81,40 +81,42 @@ describe("getArcDash", () => {
 });
 
 describe("getNeedleAngle", () => {
-  it("returns start angle when value equals min", () => {
+  // CSS rotation: 0°=up, 90°=right, 180°=down, 270°=left
+
+  it("returns left (270°) when value equals min on 180° arc", () => {
     const angle = getNeedleAngle(0, 0, 100, 180);
-    expect(angle).toBe(180); // baseRotation for 180° arc
+    expect(angle).toBe(270); // needle points to arc start (left)
   });
 
-  it("returns end angle when value equals max", () => {
+  it("returns right (450°/90°) when value equals max on 180° arc", () => {
     const angle = getNeedleAngle(100, 0, 100, 180);
-    expect(angle).toBe(360); // 180 + 180
+    expect(angle).toBe(450); // needle points to arc end (right)
   });
 
-  it("returns midpoint angle at 50%", () => {
+  it("returns up (360°) at 50% on 180° arc", () => {
     const angle = getNeedleAngle(50, 0, 100, 180);
-    expect(angle).toBe(270); // 180 + 90
+    expect(angle).toBe(360); // needle points to arc midpoint (up)
   });
 
   it("clamps value below min", () => {
     const angle = getNeedleAngle(-10, 0, 100, 180);
-    expect(angle).toBe(180);
+    expect(angle).toBe(270);
   });
 
   it("clamps value above max", () => {
     const angle = getNeedleAngle(200, 0, 100, 180);
-    expect(angle).toBe(360);
+    expect(angle).toBe(450);
   });
 
   it("handles min === max", () => {
     const angle = getNeedleAngle(50, 50, 50, 180);
-    expect(angle).toBe(180); // returns start
+    expect(angle).toBe(270); // returns start
   });
 
   it("works with 270° arc span", () => {
     const angle = getNeedleAngle(50, 0, 100, 270);
-    const baseRotation = 135;
-    expect(angle).toBe(baseRotation + 135); // 50% of 270
+    // baseRotation=135, +90 offset, 50% of 270=135
+    expect(angle).toBe(135 + 135 + 90); // 360 = up (midpoint)
   });
 });
 

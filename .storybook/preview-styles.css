@@ -1,0 +1,5 @@
+/* Storybook canvas background for dark mode */
+.dark body,
+.dark .docs-story {
+  background-color: #030712; /* gray-950 */
+}
