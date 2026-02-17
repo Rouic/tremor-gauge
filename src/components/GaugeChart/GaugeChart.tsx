@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId } from "react";
+import React, { useId, useState, useLayoutEffect } from "react";
 import { cx } from "../../utils/cx";
 import { type Color, getColorValue } from "../../utils/chartColors";
 import { getArcDash, getNeedleAngle, getSegmentArcs, degToRad } from "../../utils/arc";
@@ -108,12 +108,21 @@ export const GaugeChart = React.forwardRef<SVGSVGElement, GaugeChartProps>(
     ref,
   ) => {
     const gradientId = useId();
+    const [mounted, setMounted] = useState(!showAnimation);
+    useLayoutEffect(() => {
+      if (!showAnimation) return;
+      // Flip after first paint so CSS transitions kick in
+      const id = requestAnimationFrame(() => setMounted(true));
+      return () => cancelAnimationFrame(id);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     const radius = (SIZE - strokeWidth * 2) / 2;
     const range = max - min;
-    const fraction =
+    const targetFraction =
       range <= 0
         ? 0
         : (Math.max(min, Math.min(max, value)) - min) / range;
+    const fraction = mounted ? targetFraction : 0;
 
     // Resolve fill color
     const activeColor = resolveColor(value, color, thresholds);
@@ -180,9 +189,12 @@ export const GaugeChart = React.forwardRef<SVGSVGElement, GaugeChartProps>(
     })();
 
     // Needle
-    const needleAngle = showNeedle
+    const targetNeedleAngle = showNeedle
       ? getNeedleAngle(value, min, max, arcSpan)
       : 0;
+    const needleAngle = mounted
+      ? targetNeedleAngle
+      : getNeedleAngle(min, min, max, arcSpan);
     const needleLength = radius - 4;
 
     // ── Label positioning ──────────────────────────────────────────
@@ -222,7 +234,13 @@ export const GaugeChart = React.forwardRef<SVGSVGElement, GaugeChartProps>(
       centerLabelBottom,
     );
 
-    const gradientAngle = track.rotationDeg;
+    // Gradient arc start/end coordinates (userSpaceOnUse)
+    const gradStartRad = degToRad(track.rotationDeg);
+    const gradEndRad = degToRad(track.rotationDeg + arcSpan);
+    const gradX1 = CX + radius * Math.cos(gradStartRad);
+    const gradY1 = CY + radius * Math.sin(gradStartRad);
+    const gradX2 = CX + radius * Math.cos(gradEndRad);
+    const gradY2 = CY + radius * Math.sin(gradEndRad);
 
     // Tapered needle path (triangle: narrow tip, wide base)
     const needleBaseHalf = 3.5;
@@ -248,7 +266,11 @@ export const GaugeChart = React.forwardRef<SVGSVGElement, GaugeChartProps>(
           {gradient && (
             <linearGradient
               id={gradientId}
-              gradientTransform={`rotate(${gradientAngle})`}
+              gradientUnits="userSpaceOnUse"
+              x1={gradX2}
+              y1={gradY2}
+              x2={gradX1}
+              y2={gradY1}
             >
               <stop
                 offset="0%"

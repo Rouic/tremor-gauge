@@ -123,6 +123,7 @@ export const RevenueBreakdown: StoryObj<RevenueArgs> = {
           arcSpan={args.arcSpan}
           strokeWidth={args.strokeWidth}
           showAnimation={args.showAnimation}
+          activeName={active}
           className="mt-8"
           onValueChange={(d) =>
             setActive(d ? String(d.source) : undefined)
@@ -195,6 +196,7 @@ export const BudgetSideBySide: StoryObj<BudgetArgs> = {
             arcSpan={args.arcSpan}
             strokeWidth={args.strokeWidth}
             showAnimation={args.showAnimation}
+            activeName={active}
             onValueChange={(d) =>
               setActive(d ? String(d.dept) : undefined)
             }
@@ -584,6 +586,7 @@ export const DashboardRow: StoryObj<DashboardRowArgs> = {
                 valueFormatter={compact}
                 strokeWidth={args.strokeWidth}
                 showAnimation={args.showAnimation}
+                activeName={active}
                 onValueChange={(d) =>
                   setActive(d ? String(d.channel) : undefined)
                 }
@@ -825,6 +828,7 @@ export const UsersByRegion: StoryObj<RegionArgs> = {
               </span>
             </div>
           )}
+          activeName={selected}
           onValueChange={(d) =>
             setSelected(d ? String(d.region) : undefined)
           }
@@ -1120,6 +1124,7 @@ export const SalesWithTarget: StoryObj<SalesArgs> = {
               marker={{ value: args.target }}
               strokeWidth={args.strokeWidth}
               showAnimation={args.showAnimation}
+              activeName={active}
               onValueChange={(d) =>
                 setActive(d ? String(d.team) : undefined)
               }
@@ -1296,6 +1301,7 @@ export const FullDashboard: StoryObj<FullArgs> = {
                 valueFormatter={gbp}
                 strokeWidth={args.strokeWidth}
                 showAnimation={args.showAnimation}
+                activeName={active}
                 onValueChange={(d) =>
                   setActive(d ? String(d.asset) : undefined)
                 }

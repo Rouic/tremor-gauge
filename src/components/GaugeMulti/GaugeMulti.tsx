@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useLayoutEffect } from "react";
 import { cx } from "../../utils/cx";
 import {
   type Color,
@@ -28,6 +28,12 @@ export interface GaugeMultiProps {
   showTooltip?: boolean;
   /** Called when a segment is clicked or deselected (null) */
   onValueChange?: (datum: GaugeMultiDatum | null) => void;
+  /**
+   * Externally controlled active/highlighted segment name.
+   * When set, this segment is highlighted and others are dimmed.
+   * Use together with `onValueChange` for bidirectional sync with GaugeLegend.
+   */
+  activeName?: string;
   /** Custom tooltip renderer */
   customTooltip?: (props: {
     datum: GaugeMultiDatum;
@@ -61,6 +67,7 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
       label,
       showTooltip = true,
       onValueChange,
+      activeName,
       customTooltip,
       valueFormatter = (v) => `${v}`,
       marker,
@@ -71,7 +78,17 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
     },
     ref,
   ) => {
-    const [activeIndex, setActiveIndex] = useState<number | null>(null);
+    const [mounted, setMounted] = useState(!showAnimation);
+    useLayoutEffect(() => {
+      if (!showAnimation) return;
+      const id = requestAnimationFrame(() => setMounted(true));
+      return () => cancelAnimationFrame(id);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Internal click selection (used when activeName is not controlled externally)
+    const [clickedIndex, setClickedIndex] = useState<number | null>(null);
+    // Hover state — only for tooltip, separate from highlight
+    const [hoverIndex, setHoverIndex] = useState<number | null>(null);
     const [tooltipPos, setTooltipPos] = useState<{
       x: number;
       y: number;
@@ -90,20 +107,37 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
     const track = getArcDash(radius, arcSpan, 1);
     const rotationDeg = track.rotationDeg;
 
-    // Per-segment arcs
-    const segments = getSegmentArcs(radius, arcSpan, fractions);
+    // Per-segment arcs — start at zero and animate to real values
+    const zeroFractions = data.map(() => 0);
+    const segments = getSegmentArcs(
+      radius,
+      arcSpan,
+      mounted ? fractions : zeroFractions,
+    );
+
+    // Resolve which segment index is "active" for highlight purposes
+    const resolvedActiveIndex = (() => {
+      // External control via activeName takes precedence
+      if (activeName !== undefined) {
+        const idx = data.findIndex(
+          (d) => String(d[category]) === activeName,
+        );
+        return idx >= 0 ? idx : null;
+      }
+      // Fall back to internal click state
+      return clickedIndex;
+    })();
 
     const handleSegmentClick = useCallback(
       (index: number) => {
-        if (activeIndex === index) {
-          setActiveIndex(null);
-          onValueChange?.(null);
-        } else {
-          setActiveIndex(index);
-          onValueChange?.(data[index]);
+        const isDeselect = resolvedActiveIndex === index;
+        if (activeName === undefined) {
+          // Uncontrolled: toggle internal state
+          setClickedIndex(isDeselect ? null : index);
         }
+        onValueChange?.(isDeselect ? null : data[index]);
       },
-      [activeIndex, data, onValueChange],
+      [resolvedActiveIndex, activeName, data, onValueChange],
     );
 
     const handleMouseEnter = useCallback(
@@ -116,7 +150,7 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         });
-        setActiveIndex(index);
+        setHoverIndex(index);
       },
       [showTooltip],
     );
@@ -136,11 +170,12 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
     );
 
     const handleMouseLeave = useCallback(() => {
-      if (showTooltip) {
-        setTooltipPos(null);
-        setActiveIndex(null);
-      }
-    }, [showTooltip]);
+      setTooltipPos(null);
+      setHoverIndex(null);
+    }, []);
+
+    // Tooltip shows for hover OR active segment
+    const tooltipIndex = hoverIndex ?? resolvedActiveIndex;
 
     // Marker
     const markerAngle =
@@ -185,7 +220,8 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
           {/* Segments */}
           {segments.map((seg, i) => {
             const segColor = colors[i % colors.length];
-            const isActive = activeIndex === null || activeIndex === i;
+            const isActive =
+              resolvedActiveIndex === null || resolvedActiveIndex === i;
 
             return (
               <circle
@@ -207,7 +243,7 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
                   showAnimation
                     ? {
                         transition:
-                          "stroke-dashoffset 1s ease-out, opacity 0.15s ease",
+                          "stroke-dasharray 1s ease-out, stroke-dashoffset 1s ease-out, opacity 0.15s ease",
                       }
                     : undefined
                 }
@@ -266,7 +302,7 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
         </svg>
 
         {/* Tooltip */}
-        {showTooltip && activeIndex !== null && tooltipPos && (
+        {showTooltip && tooltipIndex !== null && tooltipPos && (
           <div
             className="pointer-events-none absolute z-10 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm shadow-sm dark:border-gray-800 dark:bg-gray-950"
             style={{
@@ -277,8 +313,8 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
           >
             {customTooltip ? (
               customTooltip({
-                datum: data[activeIndex],
-                color: colors[activeIndex % colors.length],
+                datum: data[tooltipIndex],
+                color: colors[tooltipIndex % colors.length],
               })
             ) : (
               <div className="flex items-center gap-2 whitespace-nowrap">
@@ -286,15 +322,15 @@ export const GaugeMulti = React.forwardRef<SVGSVGElement, GaugeMultiProps>(
                   className="size-2.5 shrink-0 rounded-sm"
                   style={{
                     backgroundColor: getColorValue(
-                      colors[activeIndex % colors.length],
+                      colors[tooltipIndex % colors.length],
                     ),
                   }}
                 />
                 <span className="text-gray-500 dark:text-gray-500">
-                  {String(data[activeIndex][category])}
+                  {String(data[tooltipIndex][category])}
                 </span>
                 <span className="font-medium tabular-nums text-gray-900 dark:text-gray-50">
-                  {valueFormatter(Number(data[activeIndex][value]))}
+                  {valueFormatter(Number(data[tooltipIndex][value]))}
                 </span>
               </div>
             )}

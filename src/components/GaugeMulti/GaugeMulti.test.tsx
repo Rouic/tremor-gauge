@@ -132,4 +132,34 @@ describe("GaugeMulti", () => {
     );
     expect(ref.current).toBeInstanceOf(SVGSVGElement);
   });
+
+  it("dims non-active segments when activeName is set", () => {
+    const { container } = render(
+      <GaugeMulti
+        data={sampleData}
+        category="name"
+        value="amount"
+        activeName="Sales"
+      />,
+    );
+    const segments = container.querySelectorAll("[data-testid^='segment-']");
+    // segment-0 (Sales) should be fully opaque, others should be dimmed
+    expect(segments[0].getAttribute("class")).not.toContain("opacity-30");
+    expect(segments[1].getAttribute("class")).toContain("opacity-30");
+    expect(segments[2].getAttribute("class")).toContain("opacity-30");
+  });
+
+  it("shows all segments at full opacity when activeName is undefined", () => {
+    const { container } = render(
+      <GaugeMulti
+        data={sampleData}
+        category="name"
+        value="amount"
+      />,
+    );
+    const segments = container.querySelectorAll("[data-testid^='segment-']");
+    for (const seg of segments) {
+      expect(seg.getAttribute("class")).not.toContain("opacity-30");
+    }
+  });
 });
